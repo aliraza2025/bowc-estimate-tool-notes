@@ -1,0 +1,8 @@
+title: Blue Ocean Estimator Engineering Notes
+description: Technical notes from building the Blue Ocean Window Cleaning price estimator.
+url: "https://aliraza2025.github.io"
+baseurl: "/bowc-estimate-tool-notes"
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
