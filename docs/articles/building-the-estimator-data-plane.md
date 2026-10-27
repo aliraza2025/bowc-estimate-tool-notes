@@ -37,6 +37,8 @@ toc:
     label: Lessons learned
 ---
 
+Explore my complete [product, AI, analytics, and strategy portfolio](https://alirazaportfolio2026.netlify.app/).
+
 A caller asks a simple question: "How much to clean the windows on my house?" Answering it well is harder than it sounds. The office has a phone number, an address, and maybe a rough description of the home. The price needs to be fair, consistent across agents, and ready before the caller loses interest.
 
 I built the **Blue Ocean Estimate Tool** during my summer 2026 Business Operations Internship at Blue Ocean Window Cleaning, a residential and commercial cleaning company in San Diego. It is an internal Next.js app that produces phone-ready quotes for new customers from phone and Angi leads. This article explains the part that does most of the work but never appears on screen: the **data plane** that turns raw job history into the files the quote engine reads.
@@ -79,7 +81,7 @@ Caller address ──> parcel lookup ──> quote engine <───────
                                           └──> office log ──> corrections
 ```
 
-This boundary kept the live app small and predictable. Slow, failure-prone work (API pagination, text parsing, regression fitting) happens offline, where a bad run can be inspected and re-run without affecting a single quote.
+This boundary keeps expensive preparation outside the request path. API pagination, text parsing, and regression fitting happen offline, so a failed preparation run can be inspected before its artifacts replace the files used for quotes. Artifact promotion and concurrent writes still need explicit controls.
 
 ## Step 1: sync completed jobs from Housecall Pro {#step-1-sync}
 
@@ -225,7 +227,7 @@ await run("node", ["ml/build-address-lookup.mjs"]);
 await run("node", ["ml/promote-customer-data.mjs"]);
 ```
 
-This turned the office from passive users into the model's best source of labeled data, and it gave them a direct way to fix a price that felt wrong.
+This provides a path for staff to correct a price and supply labels for later preparation runs. It does not establish adoption, correction quality, or improved accuracy; corrections still need scope checks and review before reuse.
 
 ## Validation {#validation}
 
@@ -239,9 +241,9 @@ Each pipeline run ends with validation against historical jobs, using the live T
 | Quotes within 10% | 11% | 49% |
 | Quotes within 25% | 26% | 73% |
 
-The two columns use different job sets, so this is not a controlled experiment. The early column is the first validation pass. The live-predictor column, three days later, scored the enriched training set with the full blended engine, including lookups and address comps. The direction is still clear: most of the improvement came from data work (cleaning, enrichment, and comps), not from a more complex model.
+The two columns use different job sets, so this is not a controlled experiment. The early column is the first validation pass. The live-predictor column, three days later, scored the enriched training set with the full blended engine, including lookups and address comps. The later run combines cleaning, enrichment, and comparable-job signals, but these evaluations do not isolate the contribution of each change.
 
-The numbers also need an honest caveat. The live predictor uses address comps built from the same history it is scored on, so repeat addresses look better than a truly new customer would. The remaining bias is slightly negative (about $23 under on average), which suits a phone quote that the agent can adjust upward after a site visit. A separate check on 17 known townhome units from an HOA project landed within 10% for 82% of units.
+The numbers also need an honest caveat. The live predictor uses address comps built from the same history it is scored on, so repeat addresses look better than a truly new customer would. The reported mean bias was about $23 under the reference price. This is an observed error, not evidence that underpricing is desirable. A separate check on 17 known townhome units from an HOA project landed within 10% for 82% of units; the small, specific sample does not establish generalization.
 
 ## Tradeoffs and limits {#tradeoffs}
 
@@ -249,24 +251,27 @@ The architecture is deliberately small, and that has costs.
 
 **Files instead of a database.** JSON artifacts are easy to inspect and version, but they assume a single writer and a modest data size. A larger operation would move job history to PostgreSQL and schedule the pipeline.
 
-**Address matching is heuristic.** Normalized street strings and fuzzy parcel queries work most of the time, but they are not a geocoder-grade match. Parcel coverage at 29% is the biggest accuracy ceiling.
+**Address matching is heuristic.** Normalized street strings and fuzzy parcel queries require match-quality checks. Parcel coverage was 29% in the reported run; the evaluation does not isolate its effect on accuracy.
 
 **Evaluation is optimistic for repeat addresses.** The next step is a time-based holdout that scores only addresses first seen after the training cutoff.
 
-**The gold set is small.** Eighteen carefully tracked jobs steer the model well, but more tracked jobs would make the fit far more stable.
+**The gold set is small.** Eighteen heavily weighted jobs can strongly affect the fit. More representative labels and held-out evaluation are needed to assess stability.
 
 **Customer data needs a separate home.** Training inputs contain customer-level records. In a next iteration I would keep raw exports in private storage and commit only aggregated, anonymized artifacts.
 
 ## Lessons learned {#lessons}
 
-The biggest lesson was that pricing accuracy is mostly a data problem. Deciding which jobs count as "window cleaning," which size field describes the house, and how to read hours out of free text moved the error far more than any modeling choice.
+The biggest lesson was to make data assumptions inspectable: which jobs count as window cleaning, which size field describes the house, and how hours are recovered from free text. The retrospective comparisons do not isolate the effect of those choices from model changes or repeat-address evidence.
 
-The second lesson was to treat explainability as a product feature, not a nice-to-have. An agent will not trust a number they cannot explain to a customer. Showing each pricing step, with its source and weight, made the tool something people used rather than overrode.
+The second lesson was to treat explainability as a product feature, not a nice-to-have. An agent will not trust a number they cannot explain to a customer. Showing each pricing step, with its source and weight, gives staff a basis for reviewing and correcting a quote.
 
-Finally, the simplest durable architecture won again. A pipeline of plain scripts writing versioned JSON, read by a small Next.js app, was enough to replace spreadsheet guesswork with a consistent, auditable quote, and it left clear upgrade points for when the business outgrows it.
+The resulting design uses scripts to write versioned JSON artifacts for a small Next.js app. That makes the calculation inspectable and identifies future storage and promotion work. It does not, by itself, establish business savings, adoption, or a reduction in quoting time.
 
 ---
 
 **Project:** Blue Ocean Estimate Tool (internal Next.js app)  
 **Author:** Ali Raza, Business Operations Intern, Blue Ocean Window Cleaning  
 **Topic:** Data-plane architecture for service-business price estimation
+
+Explore my complete [product, AI, analytics, and strategy portfolio](https://alirazaportfolio2026.netlify.app/).
+
