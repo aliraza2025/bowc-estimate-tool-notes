@@ -8,9 +8,14 @@
     <meta property="og:type" content="article">
     <meta property="og:title" content="{{ page.title | escape }}">
     <meta property="og:description" content="{{ page.description | escape }}">
-    <meta property="og:url" content="{{ page.url | absolute_url }}">
+    <meta property="og:url" content="{{ page.moved_to | default: page.url | absolute_url }}">
     <meta name="twitter:card" content="summary_large_image">
+    {% if page.moved_to %}
+    <link rel="canonical" href="{{ page.moved_to }}">
+    <meta http-equiv="refresh" content="0; url={{ page.moved_to }}">
+    {% else %}
     <link rel="canonical" href="{{ page.url | absolute_url }}">
+    {% endif %}
     <title>{{ page.title }} | {{ site.title }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +23,11 @@
     <link rel="stylesheet" href="{{ '/assets/article.css' | relative_url }}">
   </head>
   <body>
+    {% if page.moved_to %}
+    <p style="margin:0;padding:12px 20px;background:#111;color:#fff;font:600 15px/1.5 system-ui,sans-serif;text-align:center">
+      This has moved to <a style="color:#ff7ab8" href="{{ page.moved_to }}">{{ page.moved_to }}</a>. Redirecting…
+    </p>
+    {% endif %}
     <a class="skip-link" href="#article-content">Skip to article</a>
 
     <header class="site-header">
@@ -25,7 +35,7 @@
         <span class="wordmark-mark" aria-hidden="true">BO</span>
         <span>Blue Ocean Estimator / Engineering Notes</span>
       </a>
-      <a class="header-link" href="https://alirazaportfolio2026.netlify.app">Portfolio</a>
+      <a class="header-link" href="https://alirazaai.page">Portfolio</a>
     </header>
 
     <main>
@@ -66,7 +76,7 @@
         <p class="eyebrow">Continue exploring</p>
         <h2 id="closing-title">See the project in context.</h2>
         <p>The portfolio case study covers the business problem, my role as Business Operations Intern, and the results alongside my other product and analytics work.</p>
-        <a class="primary-link" href="https://alirazaportfolio2026.netlify.app/experience">Open the portfolio</a>
+        <a class="primary-link" href="https://alirazaai.page/experience">Open the portfolio</a>
       </section>
     </main>
 

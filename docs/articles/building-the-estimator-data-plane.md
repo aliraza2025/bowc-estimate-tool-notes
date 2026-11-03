@@ -1,4 +1,5 @@
 ---
+moved_to: https://alirazaai.page/notes/estimator-data-plane
 layout: article
 title: Building the Data Plane Behind a Phone-Ready Window-Cleaning Quote
 description: How I turned 11,000+ Housecall Pro jobs, San Diego parcel records, and a small set of tracked jobs into an explainable pricing engine that office staff can use on a live call.
@@ -37,7 +38,7 @@ toc:
     label: Lessons learned
 ---
 
-Explore my complete [product, AI, analytics, and strategy portfolio](https://alirazaportfolio2026.netlify.app/).
+Explore my complete [product, AI, analytics, and strategy portfolio](https://alirazaai.page/).
 
 A caller asks a simple question: "How much to clean the windows on my house?" Answering it well is harder than it sounds. The office has a phone number, an address, and maybe a rough description of the home. The price needs to be fair, consistent across agents, and ready before the caller loses interest.
 
@@ -273,5 +274,5 @@ The resulting design uses scripts to write versioned JSON artifacts for a small 
 **Author:** Ali Raza, Business Operations Intern, Blue Ocean Window Cleaning  
 **Topic:** Data-plane architecture for service-business price estimation
 
-Explore my complete [product, AI, analytics, and strategy portfolio](https://alirazaportfolio2026.netlify.app/).
+Explore my complete [product, AI, analytics, and strategy portfolio](https://alirazaai.page/).
 
